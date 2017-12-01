@@ -4,12 +4,12 @@ use policy::Policy;
 struct Greedy;
 
 impl Policy for Greedy {
-  fn choose<'a, A>(&mut self, action_values: &'a [(A, f64)]) -> Option<&'a A> {
-      action_values
-        .iter()
-        .max_by(|av1, av2| av1.1.partial_cmp(&av2.1).unwrap())
-        .map(|av| &av.0)
-  }
+    fn choose<'a, A>(&mut self, action_values: &'a [(A, f64)]) -> Option<&'a A> {
+        action_values
+            .iter()
+            .max_by(|av1, av2| av1.1.partial_cmp(&av2.1).unwrap())
+            .map(|av| &av.0)
+    }
 }
 
 #[cfg(test)]
@@ -17,7 +17,10 @@ mod tests {
     use super::*;
 
     #[derive(Debug, PartialEq)]
-    enum Action {Jump, Stay}
+    enum Action {
+        Jump,
+        Stay,
+    }
 
     #[test]
     fn none_for_empty_action_values() {

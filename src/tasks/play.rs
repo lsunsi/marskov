@@ -21,13 +21,15 @@ fn play<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory<S, 
     }
 
     let action = policy.choose(&action_values).unwrap();
-    game.act(&action);
+    game.act(action);
 
     let next_state = game.clone().into();
-    sender
-      .send((state, *action, next_state, game.reward()))
-      .unwrap();
+    let sample = (state, *action, next_state, game.reward());
     state = next_state;
+
+    if let Err(_) = sender.send(sample) {
+      break;
+    }
   }
 }
 

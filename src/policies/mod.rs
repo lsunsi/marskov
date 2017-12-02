@@ -1,2 +1,2 @@
-mod greedy;
-mod random;
+pub mod greedy;
+pub mod random;

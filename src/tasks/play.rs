@@ -4,7 +4,7 @@ use memory::Memory;
 use sample::Sample;
 use game::Game;
 
-fn play<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory<S, A>>(
+pub fn play<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory<S, A>>(
   mut game: G,
   mut policy: P,
   memory: M,

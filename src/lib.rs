@@ -1,10 +1,10 @@
 extern crate rand;
 
-mod game;
-mod sample;
-mod brain;
-mod memory;
-mod memories;
-mod policy;
-mod policies;
-mod tasks;
+pub mod game;
+pub mod sample;
+pub mod brain;
+pub mod memory;
+pub mod memories;
+pub mod policy;
+pub mod policies;
+pub mod tasks;

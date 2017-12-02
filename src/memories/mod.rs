@@ -1,1 +1,1 @@
-mod table;
+pub mod table;

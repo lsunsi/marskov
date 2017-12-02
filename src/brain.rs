@@ -1,4 +1,4 @@
-struct Brain {
+pub struct Brain {
   alpha: f64,
   gamma: f64,
 }

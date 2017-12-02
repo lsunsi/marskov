@@ -3,13 +3,13 @@ use std::hash::Hash;
 use std::collections::HashMap;
 
 #[derive(Default)]
-struct Table<S: Eq + Hash, A> {
+pub struct Table<S: Eq + Hash, A> {
   map: HashMap<S, HashMap<A, f64>>,
   seed: f64,
 }
 
 impl<S: Eq + Hash, A> Table<S, A> {
-  fn with_seed(seed: f64) -> Table<S, A> {
+  pub fn with_seed(seed: f64) -> Table<S, A> {
     let map = HashMap::default();
     Table {
       seed: seed,

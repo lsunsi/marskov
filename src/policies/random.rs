@@ -1,7 +1,7 @@
 use policy::Policy;
 use rand::{thread_rng, Rng};
 
-struct Random {
+pub struct Random {
   rng: Box<Rng>,
 }
 

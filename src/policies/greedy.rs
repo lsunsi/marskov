@@ -1,7 +1,7 @@
 use policy::Policy;
 
 #[derive(Default)]
-struct Greedy;
+pub struct Greedy;
 
 impl Policy for Greedy {
     fn choose<'a, A>(&mut self, action_values: &'a [(A, f64)]) -> Option<&'a A> {

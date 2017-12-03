@@ -4,6 +4,12 @@ pub struct Brain {
 }
 
 impl Brain {
+  pub fn new(alpha: f64, gamma: f64) -> Brain {
+    Brain {
+      alpha: alpha,
+      gamma: gamma,
+    }
+  }
   pub fn learn(&self, current_value: f64, next_value: f64, reward: f64) -> f64 {
     current_value + self.alpha * (reward + self.gamma * next_value - current_value)
   }

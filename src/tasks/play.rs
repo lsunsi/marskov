@@ -1,4 +1,6 @@
 use std::sync::mpsc::Sender;
+use std::sync::RwLock;
+use std::sync::Arc;
 use policy::Policy;
 use memory::Memory;
 use sample::Sample;
@@ -7,12 +9,19 @@ use game::Game;
 pub fn play<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory<S, A>>(
   mut game: G,
   mut policy: P,
-  memory: M,
+  memory: Arc<RwLock<M>>,
   sender: Sender<Sample<S, A>>,
 ) {
   let mut state = game.clone().into();
 
   loop {
+    let result = memory.read();
+
+    if result.is_err() {
+      break;
+    }
+
+    let memory = result.unwrap();
     let mut action_values = vec![];
 
     for action in game.actions() {
@@ -38,12 +47,19 @@ pub fn play<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory
 mod tests {
   use super::*;
   use std::thread::spawn;
+  use memories::table::Table;
   use std::sync::mpsc::channel;
 
-  #[derive(Clone, Copy, Debug, PartialEq)]
+  #[derive(Clone, Copy, Debug, PartialEq, Hash, Eq)]
   enum Operation {
     Inc,
     Dec,
+  }
+
+  impl Default for Operation {
+    fn default() -> Operation {
+      Operation::Inc
+    }
   }
 
   #[derive(Clone)]
@@ -96,15 +112,6 @@ mod tests {
   }
 
   #[derive(Default)]
-  struct Dumb;
-  impl Memory<i8, Operation> for Dumb {
-    fn get(&self, _: &i8, _: &Operation) -> f64 {
-      0.0
-    }
-    fn set(&mut self, _: i8, _: Operation, _: f64) {}
-  }
-
-  #[derive(Default)]
   struct First;
   impl Policy for First {
     fn choose<'a, A>(&mut self, action_values: &'a [(A, f64)]) -> Option<&'a A> {
@@ -115,15 +122,11 @@ mod tests {
   #[test]
   fn test() {
     let (sender, receiver) = channel();
+    let table: Table<i8, Operation> = Table::default();
+    let memory = Arc::new(RwLock::new(table));
 
-    spawn(|| {
-      play(
-        Counter::default(),
-        First::default(),
-        Dumb::default(),
-        sender,
-      )
-    });
+    let memory_clone = memory.clone();
+    spawn(|| play(Counter::default(), First::default(), memory_clone, sender));
 
     assert_eq!(receiver.recv().unwrap(), (0, Operation::Inc, 1, 0.1));
     assert_eq!(receiver.recv().unwrap(), (1, Operation::Inc, 2, 0.2));

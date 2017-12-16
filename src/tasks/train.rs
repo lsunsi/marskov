@@ -44,6 +44,7 @@ mod tests {
   use std::time::Duration;
   use std::thread::{sleep, spawn};
   use std::sync::mpsc::sync_channel;
+  use policies::greedy::Greedy;
   use memories::table::Table;
 
   #[derive(Clone, Copy, Debug, PartialEq, Hash, Eq)]
@@ -107,14 +108,6 @@ mod tests {
     }
   }
 
-  #[derive(Default)]
-  struct First;
-  impl Policy for First {
-    fn choose<'a, A>(&mut self, action_values: &'a [(A, f64)]) -> Option<&'a A> {
-      action_values.first().map(|av| &av.0)
-    }
-  }
-
   #[test]
   fn test() {
     let (sender, receiver) = sync_channel(0);
@@ -125,7 +118,7 @@ mod tests {
     spawn(|| {
       train(
         Counter::default(),
-        First::default(),
+        Greedy::default(),
         memory_clone,
         receiver,
         Brain::new(0.5, 0.5),

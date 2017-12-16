@@ -42,12 +42,12 @@ pub fn play<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory
   }
 }
 
-
 #[cfg(test)]
 mod tests {
   use super::*;
   use std::thread::spawn;
   use memories::table::Table;
+  use policies::greedy::Greedy;
   use std::sync::mpsc::channel;
 
   #[derive(Clone, Copy, Debug, PartialEq, Hash, Eq)]
@@ -111,14 +111,6 @@ mod tests {
     }
   }
 
-  #[derive(Default)]
-  struct First;
-  impl Policy for First {
-    fn choose<'a, A>(&mut self, action_values: &'a [(A, f64)]) -> Option<&'a A> {
-      action_values.first().map(|av| &av.0)
-    }
-  }
-
   #[test]
   fn test() {
     let (sender, receiver) = channel();
@@ -126,7 +118,7 @@ mod tests {
     let memory = Arc::new(RwLock::new(table));
 
     let memory_clone = memory.clone();
-    spawn(|| play(Counter::default(), First::default(), memory_clone, sender));
+    spawn(|| play(Counter::default(), Greedy::default(), memory_clone, sender));
 
     assert_eq!(receiver.recv().unwrap(), (0, Operation::Inc, 1, 0.1));
     assert_eq!(receiver.recv().unwrap(), (1, Operation::Inc, 2, 0.2));

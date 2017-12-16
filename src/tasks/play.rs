@@ -1,5 +1,7 @@
 use std::sync::mpsc::Sender;
 use std::sync::RwLock;
+use play::step::step;
+use std::ops::Deref;
 use std::sync::Arc;
 use policy::Policy;
 use memory::Memory;
@@ -12,8 +14,6 @@ pub fn play<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory
   memory: Arc<RwLock<M>>,
   sender: Sender<Sample<S, A>>,
 ) {
-  let mut state = game.clone().into();
-
   loop {
     let result = memory.read();
 
@@ -22,19 +22,7 @@ pub fn play<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory
     }
 
     let memory = result.unwrap();
-    let mut action_values = vec![];
-
-    for action in game.actions() {
-      let value = memory.get(&state, &action);
-      action_values.push((action, value));
-    }
-
-    let action = policy.choose(&action_values).unwrap();
-    game.act(action);
-
-    let next_state = game.clone().into();
-    let sample = (state, *action, next_state, game.reward());
-    state = next_state;
+    let sample = step(&mut game, &mut policy, memory.deref()).unwrap();
 
     if let Err(_) = sender.send(sample) {
       break;

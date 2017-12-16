@@ -38,11 +38,11 @@ pub fn train<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memor
   }
 }
 
-
 #[cfg(test)]
 mod tests {
   use super::*;
-  use std::thread::{spawn, sleep_ms};
+  use std::time::Duration;
+  use std::thread::{sleep, spawn};
   use std::sync::mpsc::sync_channel;
   use memories::table::Table;
 
@@ -135,15 +135,15 @@ mod tests {
     assert_eq!(memory.read().unwrap().get(&0, &Operation::Inc), 0.0);
     assert_eq!(memory.read().unwrap().get(&1, &Operation::Dec), 0.0);
     sender.send((0, Operation::Inc, 1, 4.0)).unwrap();
-    sleep_ms(1);
+    sleep(Duration::from_millis(1));
     assert_eq!(memory.read().unwrap().get(&0, &Operation::Inc), 2.0);
     assert_eq!(memory.read().unwrap().get(&1, &Operation::Dec), 0.0);
     sender.send((1, Operation::Dec, 0, 4.0)).unwrap();
-    sleep_ms(1);
+    sleep(Duration::from_millis(1));
     assert_eq!(memory.read().unwrap().get(&0, &Operation::Inc), 2.0);
     assert_eq!(memory.read().unwrap().get(&1, &Operation::Dec), 2.5);
     sender.send((0, Operation::Inc, 1, 4.0)).unwrap();
-    sleep_ms(1);
+    sleep(Duration::from_millis(1));
     assert_eq!(memory.read().unwrap().get(&0, &Operation::Inc), 3.0);
     assert_eq!(memory.read().unwrap().get(&1, &Operation::Dec), 2.5);
   }

@@ -2,8 +2,9 @@ extern crate marskov;
 
 use std::sync::Arc;
 use std::sync::RwLock;
+use std::time::Duration;
 use std::sync::mpsc::channel;
-use std::thread::{sleep_ms, spawn};
+use std::thread::{sleep, spawn};
 
 use marskov::game::Game;
 use marskov::brain::Brain;
@@ -97,7 +98,7 @@ impl Game<Move> for Maze {
 }
 
 #[test]
-fn it_adds_two() {
+fn solves_maze() {
     let (sender, receiver) = channel();
     let table: Table<Maze, Move> = Table::default();
     let memory = Arc::new(RwLock::new(table));
@@ -116,7 +117,7 @@ fn it_adds_two() {
     let playing_memory = memory.clone();
     spawn(|| play(Maze::default(), Random::default(), playing_memory, sender));
 
-    sleep_ms(1000);
+    sleep(Duration::from_millis(1000));
 
     let memory = memory.read().unwrap();
     let mut greedy = Greedy::default();

@@ -7,9 +7,9 @@ use std::time::Duration;
 use std::sync::mpsc::channel;
 use std::thread::{sleep, spawn};
 
+use marskov::walk;
 use marskov::game::Game;
 use marskov::brain::Brain;
-use marskov::walk::walk::walk;
 use marskov::tasks::play::play;
 use marskov::tasks::train::train;
 use marskov::memories::table::Table;
@@ -125,7 +125,7 @@ fn solves_maze() {
 
     let mut path = vec![(0, 2), (1, 2), (2, 2), (2, 1), (2, 0), (1, 0)];
 
-    for sample in walk(&mut maze, &mut greedy, memory.deref()) {
+    for sample in walk::offline(&mut maze, &mut greedy, memory.deref()) {
         if let Some(expected_position) = path.pop() {
             assert_eq!(sample.2.current, expected_position);
         } else {

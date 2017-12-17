@@ -1,11 +1,11 @@
 use std::sync::mpsc::Sender;
 use std::sync::RwLock;
-use walk::step::step;
 use std::ops::Deref;
 use std::sync::Arc;
 use policy::Policy;
 use memory::Memory;
 use sample::Sample;
+use walk::step;
 use game::Game;
 
 pub fn play<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory<S, A>>(

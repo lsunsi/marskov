@@ -104,18 +104,25 @@ fn solves_maze() {
     let memory = Arc::new(RwLock::new(table));
 
     let training_memory = memory.clone();
-    spawn(|| {
+    spawn(move || {
         train(
-            Maze::default(),
-            Greedy::default(),
-            training_memory,
-            receiver,
-            Brain::new(0.5, 0.5),
+            &Maze::default(),
+            &mut Greedy::default(),
+            &training_memory,
+            &receiver,
+            &Brain::new(0.5, 0.5),
         )
     });
 
     let playing_memory = memory.clone();
-    spawn(|| play(Maze::default(), Random::default(), playing_memory, sender));
+    spawn(move || {
+        play(
+            &mut Maze::default(),
+            &mut Random::default(),
+            playing_memory.deref(),
+            &sender,
+        )
+    });
 
     sleep(Duration::from_millis(1000));
 

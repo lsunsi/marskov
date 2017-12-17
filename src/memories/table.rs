@@ -1,4 +1,4 @@
-use memory::Memory;
+use Memory;
 use std::hash::Hash;
 use std::collections::HashMap;
 
@@ -41,7 +41,7 @@ impl<S: Eq + Hash, A: Eq + Hash> Memory<S, A> for Table<S, A> {
 #[cfg(test)]
 mod tests {
     use super::Table;
-    use memory::Memory;
+    use Memory;
 
     #[test]
     fn seed_get_set_get() {

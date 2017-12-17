@@ -1,4 +1,4 @@
-use policy::Policy;
+use Policy;
 use rand::{thread_rng, Rng};
 
 pub struct Random {

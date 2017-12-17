@@ -7,14 +7,10 @@ use std::time::Duration;
 use std::sync::mpsc::channel;
 use std::thread::{sleep, spawn};
 
-use marskov::walk;
-use marskov::game::Game;
-use marskov::brain::Brain;
-use marskov::tasks::play::play;
-use marskov::tasks::train::train;
-use marskov::memories::table::Table;
-use marskov::policies::greedy::Greedy;
-use marskov::policies::random::Random;
+use marskov::memories::Table;
+use marskov::{walk, Brain, Game};
+use marskov::tasks::{play, train};
+use marskov::policies::{Greedy, Random};
 
 #[derive(Hash, PartialEq, Eq, Clone, Copy)]
 enum Move {

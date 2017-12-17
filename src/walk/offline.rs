@@ -1,9 +1,5 @@
+use {walk, Game, Memory, Policy, Sample};
 use std::marker::PhantomData;
-use walk::step::step;
-use memory::Memory;
-use policy::Policy;
-use sample::Sample;
-use game::Game;
 
 pub struct Walk<
     'a,
@@ -25,7 +21,7 @@ impl<'a, S, A: Copy, G: Game<A> + Into<S> + Clone, M: Memory<S, A>, P: Policy> I
     type Item = Sample<S, A>;
 
     fn next(&mut self) -> Option<Sample<S, A>> {
-        step(self.game, self.policy, self.memory)
+        walk::step(self.game, self.policy, self.memory)
     }
 }
 
@@ -46,8 +42,8 @@ pub fn offline<'a, S, A: Copy, G: Game<A> + Into<S> + Clone, M: Memory<S, A>, P:
 #[cfg(test)]
 mod tests {
     use super::*;
-    use memories::table::Table;
-    use policies::greedy::Greedy;
+    use memories::Table;
+    use policies::Greedy;
 
     #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
     enum Operation {

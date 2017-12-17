@@ -1,7 +1,4 @@
-use memory::Memory;
-use policy::Policy;
-use sample::Sample;
-use game::Game;
+use {Game, Memory, Policy, Sample};
 
 pub fn step<S, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory<S, A>>(
     game: &mut G,
@@ -30,8 +27,8 @@ pub fn step<S, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory<S, A>
 #[cfg(test)]
 mod tests {
     use super::*;
-    use memories::table::Table;
-    use policies::greedy::Greedy;
+    use memories::Table;
+    use policies::Greedy;
 
     #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
     enum Operation {

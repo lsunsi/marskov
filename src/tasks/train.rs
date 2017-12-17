@@ -1,10 +1,6 @@
+use {Brain, Game, Memory, Policy, Sample};
 use std::sync::mpsc::Receiver;
 use std::sync::RwLock;
-use policy::Policy;
-use memory::Memory;
-use sample::Sample;
-use brain::Brain;
-use game::Game;
 
 pub fn train<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory<S, A>>(
     game: &G,
@@ -38,11 +34,11 @@ pub fn train<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memor
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::time::Duration;
-    use std::thread::{sleep, spawn};
     use std::sync::mpsc::sync_channel;
-    use policies::greedy::Greedy;
-    use memories::table::Table;
+    use std::thread::{sleep, spawn};
+    use std::time::Duration;
+    use policies::Greedy;
+    use memories::Table;
     use std::sync::Arc;
 
     #[derive(Clone, Copy, Debug, PartialEq, Hash, Eq)]

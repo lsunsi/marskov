@@ -1,11 +1,7 @@
+use {walk, Game, Memory, Policy, Sample};
 use std::marker::PhantomData;
 use std::sync::RwLock;
-use walk::step::step;
 use std::ops::Deref;
-use memory::Memory;
-use policy::Policy;
-use sample::Sample;
-use game::Game;
 
 pub struct Walk<
     'a,
@@ -28,7 +24,7 @@ impl<'a, S, A: Copy, G: Game<A> + Into<S> + Clone, M: Memory<S, A>, P: Policy> I
 
     fn next(&mut self) -> Option<Sample<S, A>> {
         match self.memory.read() {
-            Ok(memory) => step(self.game, self.policy, memory.deref()),
+            Ok(memory) => walk::step(self.game, self.policy, memory.deref()),
             Err(_) => None,
         }
     }
@@ -58,8 +54,8 @@ pub fn online<
 #[cfg(test)]
 mod tests {
     use super::*;
-    use memories::table::Table;
-    use policies::greedy::Greedy;
+    use memories::Table;
+    use policies::Greedy;
 
     #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
     enum Operation {

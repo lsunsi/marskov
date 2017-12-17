@@ -1,4 +1,4 @@
-use policy::Policy;
+use Policy;
 
 #[derive(Default)]
 pub struct Greedy;

@@ -1,10 +1,6 @@
+use {walk, Game, Memory, Policy, Sample};
 use std::sync::mpsc::Sender;
 use std::sync::RwLock;
-use policy::Policy;
-use memory::Memory;
-use sample::Sample;
-use walk;
-use game::Game;
 
 pub fn play<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory<S, A>>(
     game: &mut G,
@@ -22,10 +18,10 @@ pub fn play<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::thread::spawn;
-    use memories::table::Table;
-    use policies::greedy::Greedy;
     use std::sync::mpsc::channel;
+    use std::thread::spawn;
+    use policies::Greedy;
+    use memories::Table;
 
     #[derive(Clone, Copy, Debug, PartialEq, Hash, Eq)]
     enum Operation {

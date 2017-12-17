@@ -1,11 +1,17 @@
 extern crate rand;
 
-pub mod game;
-pub mod sample;
-pub mod brain;
-pub mod memory;
-pub mod memories;
-pub mod policy;
-pub mod policies;
-pub mod tasks;
+mod game;
+mod brain;
+mod sample;
+mod memory;
+mod policy;
 pub mod walk;
+pub mod tasks;
+pub mod memories;
+pub mod policies;
+
+pub use self::game::Game;
+pub use self::brain::Brain;
+pub use self::sample::Sample;
+pub use self::memory::Memory;
+pub use self::policy::Policy;

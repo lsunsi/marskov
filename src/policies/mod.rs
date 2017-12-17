@@ -1,2 +1,5 @@
-pub mod greedy;
-pub mod random;
+mod greedy;
+mod random;
+
+pub use self::greedy::Greedy;
+pub use self::random::Random;

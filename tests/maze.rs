@@ -1,6 +1,7 @@
 extern crate marskov;
 
 use std::sync::Arc;
+use std::ops::Deref;
 use std::sync::RwLock;
 use std::time::Duration;
 use std::sync::mpsc::channel;
@@ -8,8 +9,7 @@ use std::thread::{sleep, spawn};
 
 use marskov::game::Game;
 use marskov::brain::Brain;
-use marskov::policy::Policy;
-use marskov::memory::Memory;
+use marskov::play::walk::walk;
 use marskov::tasks::play::play;
 use marskov::tasks::train::train;
 use marskov::memories::table::Table;
@@ -123,16 +123,15 @@ fn solves_maze() {
     let mut greedy = Greedy::default();
     let mut maze = Maze::default();
 
-    let path = [(1, 0), (2, 0), (2, 1), (2, 2), (1, 2), (0, 2)];
+    let mut path = vec![(0, 2), (1, 2), (2, 2), (2, 1), (2, 0), (1, 0)];
 
-    for position in path.iter() {
-        let mut avs = vec![];
-        for action in maze.actions() {
-            let value = memory.get(&maze, &action);
-            avs.push((action, value));
+    for sample in walk(&mut maze, &mut greedy, memory.deref()) {
+        if let Some(expected_position) = path.pop() {
+            assert_eq!(sample.2.current, expected_position);
+        } else {
+            break;
         }
-        maze.act(greedy.choose(&avs).unwrap());
-
-        assert_eq!(maze.current, *position);
     }
+
+    assert_eq!(path.len(), 0);
 }

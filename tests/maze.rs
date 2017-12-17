@@ -9,7 +9,7 @@ use std::thread::{sleep, spawn};
 
 use marskov::game::Game;
 use marskov::brain::Brain;
-use marskov::play::walk::walk;
+use marskov::walk::walk::walk;
 use marskov::tasks::play::play;
 use marskov::tasks::train::train;
 use marskov::memories::table::Table;

@@ -1,6 +1,6 @@
 use std::sync::mpsc::Sender;
 use std::sync::RwLock;
-use play::step::step;
+use walk::step::step;
 use std::ops::Deref;
 use std::sync::Arc;
 use policy::Policy;

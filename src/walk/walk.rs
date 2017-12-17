@@ -1,5 +1,5 @@
 use std::marker::PhantomData;
-use play::step::step;
+use walk::step::step;
 use memory::Memory;
 use policy::Policy;
 use sample::Sample;

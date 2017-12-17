@@ -8,4 +8,4 @@ pub mod memories;
 pub mod policy;
 pub mod policies;
 pub mod tasks;
-pub mod play;
+pub mod walk;

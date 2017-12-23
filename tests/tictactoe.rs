@@ -137,7 +137,7 @@ fn solves_tictactoe() {
             &mut Greedy::default(),
             &training_memory,
             &receiver,
-            &Brain::new(0.9, 0.9),
+            &Brain::new(0.99, 0.99),
         )
     });
 
@@ -145,13 +145,13 @@ fn solves_tictactoe() {
     spawn(move || {
         play(
             &mut Board::default(),
-            &mut Egreedy::new(0.1),
+            &mut Egreedy::new(0.01),
             playing_memory.deref(),
             &sender,
         )
     });
 
-    sleep(Duration::from_secs(45));
+    sleep(Duration::from_secs(60));
 
     let memory = memory.read().unwrap();
     let mut greedy = Greedy::default();

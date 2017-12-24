@@ -35,7 +35,11 @@ struct Board {
     count: i8,
 }
 
-impl Game<i8> for Board {
+impl Game<Board, i8> for Board {
+    fn state(&self) -> Board {
+        *self
+    }
+
     fn actions(&self) -> Vec<i8> {
         if self.invalid || self.winner != Tile::Empty || self.count == 9 {
             vec![-1]

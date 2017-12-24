@@ -3,14 +3,7 @@ use std::marker::PhantomData;
 use std::sync::RwLock;
 use std::ops::Deref;
 
-pub struct Walk<
-    'a,
-    S: 'a,
-    A: 'a + Copy,
-    G: 'a + Game<A> + Into<S> + Clone,
-    M: 'a + Memory<S, A>,
-    P: 'a + Policy,
-> {
+pub struct Walk<'a, S: 'a, A: 'a + Copy, G: 'a + Game<S, A>, M: 'a + Memory<S, A>, P: 'a + Policy> {
     _a: PhantomData<A>,
     _s: PhantomData<S>,
     game: &'a mut G,
@@ -18,7 +11,7 @@ pub struct Walk<
     memory: &'a RwLock<M>,
 }
 
-impl<'a, S, A: Copy, G: Game<A> + Into<S> + Clone, M: Memory<S, A>, P: Policy> Iterator
+impl<'a, S, A: Copy, G: Game<S, A>, M: Memory<S, A>, P: Policy> Iterator
     for Walk<'a, S, A, G, M, P> {
     type Item = Sample<S, A>;
 
@@ -30,14 +23,7 @@ impl<'a, S, A: Copy, G: Game<A> + Into<S> + Clone, M: Memory<S, A>, P: Policy> I
     }
 }
 
-pub fn online<
-    'a,
-    S: 'a,
-    A: 'a + Copy,
-    G: 'a + Game<A> + Into<S> + Clone,
-    M: Memory<S, A>,
-    P: 'a + Policy,
->(
+pub fn online<'a, S: 'a, A: 'a + Copy, G: 'a + Game<S, A>, M: Memory<S, A>, P: 'a + Policy>(
     game: &'a mut G,
     policy: &'a mut P,
     memory: &'a RwLock<M>,
@@ -74,7 +60,11 @@ mod tests {
         value: i8,
     }
 
-    impl Game<Operation> for Counter {
+    impl Game<Counter, Operation> for Counter {
+        fn state(&self) -> Counter {
+            *self
+        }
+
         fn actions(&self) -> Vec<Operation> {
             if self.value < 2 && self.value > -2 {
                 vec![Operation::Dec, Operation::Inc]

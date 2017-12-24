@@ -59,7 +59,11 @@ impl Default for Maze {
     }
 }
 
-impl Game<Move> for Maze {
+impl Game<Maze, Move> for Maze {
+    fn state(&self) -> Maze {
+        *self
+    }
+
     fn actions(&self) -> Vec<Move> {
         vec![Move::Left, Move::Right, Move::Up, Move::Down]
     }

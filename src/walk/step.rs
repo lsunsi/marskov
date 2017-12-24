@@ -1,11 +1,11 @@
 use {Game, Memory, Policy, Sample};
 
-pub fn step<S, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory<S, A>>(
+pub fn step<S, A: Copy, G: Game<S, A>, P: Policy, M: Memory<S, A>>(
     game: &mut G,
     policy: &mut P,
     memory: &M,
 ) -> Option<Sample<S, A>> {
-    let state = game.clone().into();
+    let state = game.state();
 
     let mut actions_values = vec![];
     for action in game.actions() {
@@ -16,7 +16,7 @@ pub fn step<S, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory<S, A>
     if let Some(action) = policy.choose(&actions_values) {
         game.act(action);
 
-        let next_state = game.clone().into();
+        let next_state = game.state();
 
         return Some((state, *action, next_state, game.reward()));
     }
@@ -46,7 +46,11 @@ mod tests {
         value: i8,
     }
 
-    impl Game<Operation> for Counter {
+    impl Game<Counter, Operation> for Counter {
+        fn state(&self) -> Counter {
+            *self
+        }
+
         fn actions(&self) -> Vec<Operation> {
             if self.value < 2 {
                 vec![Operation::Inc]

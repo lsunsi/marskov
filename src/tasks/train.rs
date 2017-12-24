@@ -2,7 +2,7 @@ use {Brain, Game, Memory, Policy, Sample};
 use std::sync::mpsc::Receiver;
 use std::sync::RwLock;
 
-pub fn train<S: Copy, A: Copy, G: Game<A> + Into<S> + Clone, P: Policy, M: Memory<S, A>>(
+pub fn train<S: Copy, A: Copy, G: Game<S, A>, P: Policy, M: Memory<S, A>>(
     game: &G,
     policy: &mut P,
     memory: &RwLock<M>,
@@ -65,13 +65,11 @@ mod tests {
         }
     }
 
-    impl Into<i8> for Counter {
-        fn into(self) -> i8 {
+    impl Game<i8, Operation> for Counter {
+        fn state(&self) -> i8 {
             self.value
         }
-    }
 
-    impl Game<Operation> for Counter {
         fn actions(&self) -> Vec<Operation> {
             if self.up {
                 vec![Operation::Inc]

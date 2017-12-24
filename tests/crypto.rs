@@ -8,14 +8,14 @@ use std::sync::mpsc::channel;
 use std::thread::{sleep, spawn};
 
 use marskov::memories::Table;
-use marskov::{Brain, Game, Policy, Memory};
+use marskov::{Brain, Game, Memory, Policy};
 use marskov::tasks::{play, train};
 use marskov::policies::{Greedy, Random};
 
 #[derive(Eq, Clone, Copy, Debug, Hash, PartialEq)]
 enum Trade {
     Buy,
-    Sell
+    Sell,
 }
 
 impl Default for Trade {
@@ -52,16 +52,37 @@ impl Market {
     }
 }
 
-impl Into<(usize, bool)> for Market {
-    fn into(self) -> (usize, bool) {
-        (self.step, self.bitcoin > 0.)
-    }
-}
-
 impl Default for Market {
     fn default() -> Market {
         let step = 0;
-        let prices = vec![0.0021652099999999999, 0.0021769200000000002, 0.0021503400000000002, 0.0022436999999999999, 0.0021806899999999999, 0.0022000000000000001, 0.002215, 0.00204944, 0.00217001, 0.00219001, 0.00223245, 0.0023675300000000001, 0.0026499000000000002, 0.0025984900000000002, 0.0027921999999999999, 0.0033499699999999999, 0.0031486399999999999, 0.0034795099999999999, 0.0036847099999999999, 0.0036149999999999997, 0.0036793400000000001, 0.0037988700000000002, 0.0039398599999999999, 0.0050299999999999997, 0.0052924299999999999, 0.0063746699999999998];
+        let prices = vec![
+            0.0021652099999999999,
+            0.0021769200000000002,
+            0.0021503400000000002,
+            0.0022436999999999999,
+            0.0021806899999999999,
+            0.0022000000000000001,
+            0.002215,
+            0.00204944,
+            0.00217001,
+            0.00219001,
+            0.00223245,
+            0.0023675300000000001,
+            0.0026499000000000002,
+            0.0025984900000000002,
+            0.0027921999999999999,
+            0.0033499699999999999,
+            0.0031486399999999999,
+            0.0034795099999999999,
+            0.0036847099999999999,
+            0.0036149999999999997,
+            0.0036793400000000001,
+            0.0037988700000000002,
+            0.0039398599999999999,
+            0.0050299999999999997,
+            0.0052924299999999999,
+            0.0063746699999999998,
+        ];
         let price = prices[step];
 
         Market {
@@ -75,7 +96,11 @@ impl Default for Market {
     }
 }
 
-impl Game<Trade> for Market {
+impl Game<(usize, bool), Trade> for Market {
+    fn state(&self) -> (usize, bool) {
+        (self.step, self.bitcoin > 0.)
+    }
+
     fn actions(&self) -> Vec<Trade> {
         vec![Trade::Buy, Trade::Sell]
     }
@@ -150,7 +175,7 @@ fn solves_crypto() {
     println!("");
     loop {
         let mut action_values = vec![];
-        let state = market.clone().into();
+        let state = market.state();
 
         for action in market.actions() {
             let value = memory.get(&state, &action);

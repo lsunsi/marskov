@@ -13,27 +13,22 @@ impl Policy for Greedy {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[derive(Debug, PartialEq)]
-    enum Action {
-        Jump,
-        Stay,
-    }
+    use game::counter::*;
 
     #[test]
     fn none_for_empty_action_values() {
         let mut greedy = Greedy::default();
-        assert_eq!(greedy.choose(vec![]) as Option<Action>, None);
+        assert_eq!(greedy.choose(vec![]) as Option<Operation>, None);
     }
 
     #[test]
     fn some_max_valued_action() {
         let mut greedy = Greedy::default();
 
-        let action_values_1 = vec![(Action::Jump, 0.1), (Action::Stay, 0.2)];
-        let action_values_2 = vec![(Action::Jump, 0.2), (Action::Stay, 0.1)];
+        let action_values_1 = vec![(Operation::Dec, 0.1), (Operation::Inc, 0.2)];
+        let action_values_2 = vec![(Operation::Dec, 0.2), (Operation::Inc, 0.1)];
 
-        assert_eq!(greedy.choose(action_values_1), Some(Action::Stay));
-        assert_eq!(greedy.choose(action_values_2), Some(Action::Jump));
+        assert_eq!(greedy.choose(action_values_1), Some(Operation::Inc));
+        assert_eq!(greedy.choose(action_values_2), Some(Operation::Dec));
     }
 }

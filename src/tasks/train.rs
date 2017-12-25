@@ -34,6 +34,7 @@ pub fn train<G: Game, P: Policy, M: Memory<G::State, G::Action>>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use game::counter::*;
     use std::sync::mpsc::sync_channel;
     use std::thread::{sleep, spawn};
     use std::time::Duration;
@@ -41,70 +42,8 @@ mod tests {
     use memories::Table;
     use std::sync::Arc;
 
-    #[derive(Clone, Copy, Debug, PartialEq, Hash, Eq)]
-    enum Operation {
-        Inc,
-        Dec,
-    }
-
-    impl Default for Operation {
-        fn default() -> Operation {
-            Operation::Inc
-        }
-    }
-
-    #[derive(Clone)]
-    struct Counter {
-        value: i8,
-        up: bool,
-    }
-
-    impl Default for Counter {
-        fn default() -> Counter {
-            Counter { value: 0, up: true }
-        }
-    }
-
-    impl Game for Counter {
-        type State = i8;
-        type Action = Operation;
-
-        fn state(&self) -> i8 {
-            self.value
-        }
-
-        fn actions(&self) -> Vec<Operation> {
-            if self.up {
-                vec![Operation::Inc]
-            } else {
-                vec![Operation::Dec]
-            }
-        }
-
-        fn act(&mut self, op: &Operation) {
-            self.value += match *op {
-                Operation::Dec => -1,
-                Operation::Inc => 1,
-            };
-
-            self.up = match self.value {
-                2 => false,
-                0 => true,
-                _ => self.up,
-            };
-        }
-
-        fn reward(&self) -> f64 {
-            if self.value != 0 {
-                (self.value as f64) / 10.0
-            } else {
-                0.0
-            }
-        }
-    }
-
     #[test]
-    fn test() {
+    fn test_train() {
         let (sender, receiver) = sync_channel(0);
         let table: Table<i8, Operation> = Table::default();
         let memory = Arc::new(RwLock::new(table));
@@ -132,7 +71,7 @@ mod tests {
         assert_eq!(memory.read().unwrap().get(&1, &Operation::Dec), 2.5);
         sender.send((0, Operation::Inc, 1, 4.0)).unwrap();
         sleep(Duration::from_millis(1));
-        assert_eq!(memory.read().unwrap().get(&0, &Operation::Inc), 3.0);
+        assert_eq!(memory.read().unwrap().get(&0, &Operation::Inc), 3.625);
         assert_eq!(memory.read().unwrap().get(&1, &Operation::Dec), 2.5);
     }
 }

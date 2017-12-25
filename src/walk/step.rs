@@ -27,72 +27,21 @@ pub fn step<G: Game, P: Policy, M: Memory<G::State, G::Action>>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use game::counter::*;
     use memories::Table;
     use policies::Greedy;
-
-    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-    enum Operation {
-        Inc,
-    }
-
-    impl Default for Operation {
-        fn default() -> Operation {
-            Operation::Inc
-        }
-    }
-
-    #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
-    struct Counter {
-        value: i8,
-    }
-
-    impl Game for Counter {
-        type State = Counter;
-        type Action = Operation;
-
-        fn state(&self) -> Counter {
-            *self
-        }
-
-        fn actions(&self) -> Vec<Operation> {
-            if self.value < 2 {
-                vec![Operation::Inc]
-            } else {
-                vec![]
-            }
-        }
-
-        fn act(&mut self, op: &Operation) {
-            if *op == Operation::Inc {
-                self.value += 1;
-            }
-        }
-
-        fn reward(&self) -> f64 {
-            self.value as f64
-        }
-    }
+    use Memory;
 
     #[test]
-    fn test() {
+    fn test_step() {
         let mut game = Counter::default();
         let mut policy = Greedy::default();
-        let memory: Table<Counter, Operation> = Table::default();
+        let mut memory: Table<i8, Operation> = Table::default();
+        memory.set(1, Operation::Dec, 1.0);
 
         let steps = [
-            Some((
-                Counter { value: 0 },
-                Operation::Inc,
-                Counter { value: 1 },
-                1.,
-            )),
-            Some((
-                Counter { value: 1 },
-                Operation::Inc,
-                Counter { value: 2 },
-                2.,
-            )),
-            None,
+            Some((0, Operation::Inc, 1, 1.)),
+            Some((1, Operation::Dec, 0, -1.)),
         ];
 
         for s in steps.iter() {

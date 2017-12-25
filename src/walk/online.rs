@@ -34,103 +34,36 @@ pub fn online<'a, G: 'a + Game, M: Memory<G::State, G::Action>, P: 'a + Policy>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use game::counter::*;
     use memories::Table;
     use policies::Greedy;
-
-    #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-    enum Operation {
-        Inc,
-        Dec,
-    }
-
-    impl Default for Operation {
-        fn default() -> Operation {
-            Operation::Inc
-        }
-    }
-
-    #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
-    struct Counter {
-        value: i8,
-    }
-
-    impl Game for Counter {
-        type State = Counter;
-        type Action = Operation;
-
-        fn state(&self) -> Counter {
-            *self
-        }
-
-        fn actions(&self) -> Vec<Operation> {
-            if self.value < 2 && self.value > -2 {
-                vec![Operation::Dec, Operation::Inc]
-            } else {
-                vec![]
-            }
-        }
-
-        fn act(&mut self, op: &Operation) {
-            self.value += match *op {
-                Operation::Inc => 1,
-                Operation::Dec => -1,
-            }
-        }
-
-        fn reward(&self) -> f64 {
-            self.value as f64
-        }
-    }
+    use Memory;
 
     #[test]
-    fn test() {
+    fn test_online() {
         let mut policy = Greedy::default();
         let memory = RwLock::new(Table::default());
 
         let mut steps = vec![
-            (
-                Counter { value: -1 },
-                Operation::Dec,
-                Counter { value: -2 },
-                -2.,
-            ),
-            (
-                Counter { value: 0 },
-                Operation::Dec,
-                Counter { value: -1 },
-                -1.,
-            ),
-            (
-                Counter { value: 1 },
-                Operation::Inc,
-                Counter { value: 2 },
-                2.,
-            ),
-            (
-                Counter { value: 0 },
-                Operation::Inc,
-                Counter { value: 1 },
-                1.,
-            ),
+            (0, Operation::Dec, -1, -1.),
+            (1, Operation::Dec, 0, -1.),
+            (2, Operation::Dec, 1, -1.),
+            (1, Operation::Inc, 2, 1.),
+            (0, Operation::Inc, 1, 1.),
         ];
 
         for s in online(&mut Counter::default(), &mut policy, &memory) {
-            assert_eq!(s, steps.pop().unwrap());
+            match steps.pop() {
+                Some(step) => assert_eq!(s, step),
+                None => break,
+            };
+
+            if s.2 == 2 {
+                let mut memory = memory.write().unwrap();
+                memory.set(2, Operation::Dec, 1.);
+                memory.set(1, Operation::Dec, 1.);
+                memory.set(0, Operation::Dec, 1.);
+            }
         }
-
-        memory
-            .write()
-            .unwrap()
-            .set(Counter { value: 0 }, Operation::Dec, 1.);
-        memory
-            .write()
-            .unwrap()
-            .set(Counter { value: -1 }, Operation::Dec, 1.);
-
-        for s in online(&mut Counter::default(), &mut policy, &memory) {
-            assert_eq!(s, steps.pop().unwrap());
-        }
-
-        assert_eq!(steps.len(), 0);
     }
 }

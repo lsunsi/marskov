@@ -18,91 +18,33 @@ pub fn play<G: Game, P: Policy, M: Memory<G::State, G::Action>>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use game::counter::*;
     use std::sync::mpsc::channel;
     use std::thread::spawn;
     use policies::Greedy;
     use memories::Table;
-
-    #[derive(Clone, Copy, Debug, PartialEq, Hash, Eq)]
-    enum Operation {
-        Inc,
-        Dec,
-    }
-
-    impl Default for Operation {
-        fn default() -> Operation {
-            Operation::Inc
-        }
-    }
-
-    #[derive(Clone)]
-    struct Counter {
-        value: i8,
-        up: bool,
-    }
-
-    impl Default for Counter {
-        fn default() -> Counter {
-            Counter { value: 0, up: true }
-        }
-    }
-
-    impl Game for Counter {
-        type State = i8;
-        type Action = Operation;
-
-        fn state(&self) -> i8 {
-            self.value
-        }
-
-        fn actions(&self) -> Vec<Operation> {
-            if self.up {
-                vec![Operation::Inc]
-            } else {
-                vec![Operation::Dec]
-            }
-        }
-
-        fn act(&mut self, op: &Operation) {
-            self.value += match *op {
-                Operation::Dec => -1,
-                Operation::Inc => 1,
-            };
-
-            self.up = match self.value {
-                2 => false,
-                0 => true,
-                _ => self.up,
-            };
-        }
-
-        fn reward(&self) -> f64 {
-            if self.value != 0 {
-                (self.value as f64) / 10.0
-            } else {
-                0.0
-            }
-        }
-    }
+    use Memory;
 
     #[test]
-    fn test() {
+    fn test_play() {
         let (sender, receiver) = channel();
-        let table: Table<i8, Operation> = Table::default();
-        let memory = RwLock::new(table);
+        let mut table: Table<i8, Operation> = Table::default();
+
+        table.set(0, Operation::Inc, 1.);
+        table.set(1, Operation::Dec, 1.);
 
         spawn(move || {
             play(
                 &mut Counter::default(),
                 &mut Greedy::default(),
-                &memory,
+                &RwLock::new(table),
                 &sender,
             )
         });
 
-        assert_eq!(receiver.recv().unwrap(), (0, Operation::Inc, 1, 0.1));
-        assert_eq!(receiver.recv().unwrap(), (1, Operation::Inc, 2, 0.2));
-        assert_eq!(receiver.recv().unwrap(), (2, Operation::Dec, 1, 0.1));
-        assert_eq!(receiver.recv().unwrap(), (1, Operation::Dec, 0, 0.0));
+        assert_eq!(receiver.recv().unwrap(), (0, Operation::Inc, 1, 1.));
+        assert_eq!(receiver.recv().unwrap(), (1, Operation::Dec, 0, -1.));
+        assert_eq!(receiver.recv().unwrap(), (0, Operation::Inc, 1, 1.));
+        assert_eq!(receiver.recv().unwrap(), (1, Operation::Dec, 0, -1.));
     }
 }

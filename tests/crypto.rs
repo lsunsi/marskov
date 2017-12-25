@@ -182,7 +182,7 @@ fn solves_crypto() {
             action_values.push((action, value));
         }
 
-        let action = greedy.choose(&action_values).unwrap();
+        let action = greedy.choose(action_values).unwrap();
 
         market.act(&action);
         println!("{:?} {} {}", action, market.bitcoin_total(), market.price);

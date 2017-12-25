@@ -22,7 +22,7 @@ pub fn train<S: Copy, A: Copy, G: Game<S, A>, P: Policy, M: Memory<S, A>>(
             action_values.push((action, value));
         }
 
-        let action1 = policy.choose(&action_values).unwrap();
+        let action1 = policy.choose(action_values).unwrap();
 
         let value0 = memory.get(&state0, &action0);
         let value1 = memory.get(&state1, &action1);

@@ -16,14 +16,15 @@ impl Egreedy {
 }
 
 impl Policy for Egreedy {
-    fn choose<'a, A>(&mut self, action_values: &'a [(A, f64)]) -> Option<&'a A> {
+    fn choose<A>(&mut self, mut action_values: Vec<(A, f64)>) -> Option<A> {
         if self.rng.gen::<f64>() < self.epsilon {
-            self.rng.choose(action_values).map(|av| &av.0)
+            match action_values.len() {
+                0 => None,
+                n => Some(action_values.swap_remove(self.rng.gen_range(0, n)).0),
+            }
         } else {
-            action_values
-                .iter()
-                .max_by(|av1, av2| av1.1.partial_cmp(&av2.1).unwrap())
-                .map(|av| &av.0)
+            action_values.sort_unstable_by(|&(_, v1), &(_, v2)| v1.partial_cmp(&v2).unwrap());
+            action_values.pop().map(|(a, _)| a)
         }
     }
 }
@@ -33,7 +34,7 @@ mod tests {
     use rand::{SeedableRng, StdRng};
     use super::*;
 
-    #[derive(Debug, PartialEq)]
+    #[derive(Clone, Debug, PartialEq)]
     enum Action {
         Jump,
         Stay,
@@ -42,7 +43,7 @@ mod tests {
     #[test]
     fn none_for_empty_action_values() {
         let mut egreedy = Egreedy::new(0.5);
-        assert_eq!(egreedy.choose(&[]) as Option<&Action>, None);
+        assert_eq!(egreedy.choose(vec![]) as Option<Action>, None);
     }
 
     #[test]
@@ -52,12 +53,12 @@ mod tests {
             rng: Box::new(StdRng::from_seed(&[1])),
         };
 
-        let action_values = [(Action::Jump, 0.1), (Action::Stay, 0.2)];
+        let action_values = vec![(Action::Jump, 0.1), (Action::Stay, 0.2)];
 
-        assert_eq!(egreedy.choose(&action_values), Some(&Action::Jump));
-        assert_eq!(egreedy.choose(&action_values), Some(&Action::Stay));
-        assert_eq!(egreedy.choose(&action_values), Some(&Action::Stay));
-        assert_eq!(egreedy.choose(&action_values), Some(&Action::Jump));
+        assert_eq!(egreedy.choose(action_values.clone()), Some(Action::Jump));
+        assert_eq!(egreedy.choose(action_values.clone()), Some(Action::Stay));
+        assert_eq!(egreedy.choose(action_values.clone()), Some(Action::Stay));
+        assert_eq!(egreedy.choose(action_values.clone()), Some(Action::Jump));
     }
 
     #[test]
@@ -67,12 +68,12 @@ mod tests {
             rng: Box::new(StdRng::from_seed(&[1])),
         };
 
-        let action_values = [(Action::Jump, 0.1), (Action::Stay, 0.2)];
+        let action_values = vec![(Action::Jump, 0.1), (Action::Stay, 0.2)];
 
-        assert_eq!(egreedy.choose(&action_values), Some(&Action::Stay));
-        assert_eq!(egreedy.choose(&action_values), Some(&Action::Stay));
-        assert_eq!(egreedy.choose(&action_values), Some(&Action::Stay));
-        assert_eq!(egreedy.choose(&action_values), Some(&Action::Stay));
+        assert_eq!(egreedy.choose(action_values.clone()), Some(Action::Stay));
+        assert_eq!(egreedy.choose(action_values.clone()), Some(Action::Stay));
+        assert_eq!(egreedy.choose(action_values.clone()), Some(Action::Stay));
+        assert_eq!(egreedy.choose(action_values.clone()), Some(Action::Stay));
     }
 
     #[test]
@@ -82,11 +83,11 @@ mod tests {
             rng: Box::new(StdRng::from_seed(&[1])),
         };
 
-        let action_values = [(Action::Jump, 0.1), (Action::Stay, 0.2)];
+        let action_values = vec![(Action::Jump, 0.1), (Action::Stay, 0.2)];
 
-        assert_eq!(egreedy.choose(&action_values), Some(&Action::Stay));
-        assert_eq!(egreedy.choose(&action_values), Some(&Action::Jump));
-        assert_eq!(egreedy.choose(&action_values), Some(&Action::Stay));
-        assert_eq!(egreedy.choose(&action_values), Some(&Action::Stay));
+        assert_eq!(egreedy.choose(action_values.clone()), Some(Action::Stay));
+        assert_eq!(egreedy.choose(action_values.clone()), Some(Action::Jump));
+        assert_eq!(egreedy.choose(action_values.clone()), Some(Action::Stay));
+        assert_eq!(egreedy.choose(action_values.clone()), Some(Action::Stay));
     }
 }

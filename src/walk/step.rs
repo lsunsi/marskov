@@ -13,12 +13,12 @@ pub fn step<S, A: Copy, G: Game<S, A>, P: Policy, M: Memory<S, A>>(
         actions_values.push((action, value));
     }
 
-    if let Some(action) = policy.choose(&actions_values) {
-        game.act(action);
+    if let Some(action) = policy.choose(actions_values) {
+        game.act(&action);
 
         let next_state = game.state();
 
-        return Some((state, *action, next_state, game.reward()));
+        return Some((state, action, next_state, game.reward()));
     }
 
     None

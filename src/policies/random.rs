@@ -14,8 +14,11 @@ impl Default for Random {
 }
 
 impl Policy for Random {
-    fn choose<'a, A>(&mut self, action_values: &'a [(A, f64)]) -> Option<&'a A> {
-        self.rng.choose(action_values).map(|av| &av.0)
+    fn choose<A>(&mut self, mut action_values: Vec<(A, f64)>) -> Option<A> {
+        match action_values.len() {
+            0 => None,
+            n => Some(action_values.swap_remove(self.rng.gen_range(0, n)).0),
+        }
     }
 }
 
@@ -24,7 +27,7 @@ mod tests {
     use rand::{SeedableRng, StdRng};
     use super::*;
 
-    #[derive(Debug, PartialEq)]
+    #[derive(Clone, Debug, PartialEq)]
     enum Action {
         Jump,
         Stay,
@@ -33,7 +36,7 @@ mod tests {
     #[test]
     fn none_for_empty_action_values() {
         let mut random = Random::default();
-        assert_eq!(random.choose(&[]) as Option<&Action>, None);
+        assert_eq!(random.choose(vec![]) as Option<Action>, None);
     }
 
     #[test]
@@ -45,9 +48,9 @@ mod tests {
             rng: Box::new(StdRng::from_seed(&[4])),
         };
 
-        let action_values = [(Action::Jump, 0.1), (Action::Stay, 0.2)];
+        let action_values = vec![(Action::Jump, 0.1), (Action::Stay, 0.2)];
 
-        assert_eq!(random1.choose(&action_values), Some(&Action::Stay));
-        assert_eq!(random2.choose(&action_values), Some(&Action::Jump));
+        assert_eq!(random1.choose(action_values.clone()), Some(Action::Stay));
+        assert_eq!(random2.choose(action_values.clone()), Some(Action::Jump));
     }
 }

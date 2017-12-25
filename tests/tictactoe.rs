@@ -35,7 +35,10 @@ struct Board {
     count: i8,
 }
 
-impl Game<Board, i8> for Board {
+impl Game for Board {
+    type State = Board;
+    type Action = i8;
+
     fn state(&self) -> Board {
         *self
     }

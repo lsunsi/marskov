@@ -2,11 +2,11 @@ use {Brain, Game, Memory, Policy, Sample};
 use std::sync::mpsc::Receiver;
 use std::sync::RwLock;
 
-pub fn train<S: Copy, A: Copy, G: Game<S, A>, P: Policy, M: Memory<S, A>>(
+pub fn train<G: Game, P: Policy, M: Memory<G::State, G::Action>>(
     game: &G,
     policy: &mut P,
     memory: &RwLock<M>,
-    receiver: &Receiver<Sample<S, A>>,
+    receiver: &Receiver<Sample<G::State, G::Action>>,
     brain: &Brain,
 ) {
     while let Ok((state0, action0, state1, reward)) = receiver.recv() {
@@ -65,7 +65,10 @@ mod tests {
         }
     }
 
-    impl Game<i8, Operation> for Counter {
+    impl Game for Counter {
+        type State = i8;
+        type Action = Operation;
+
         fn state(&self) -> i8 {
             self.value
         }

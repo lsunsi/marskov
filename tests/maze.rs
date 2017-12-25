@@ -59,7 +59,10 @@ impl Default for Maze {
     }
 }
 
-impl Game<Maze, Move> for Maze {
+impl Game for Maze {
+    type State = Maze;
+    type Action = Move;
+
     fn state(&self) -> Maze {
         *self
     }

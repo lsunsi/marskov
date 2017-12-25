@@ -2,11 +2,11 @@ use {walk, Game, Memory, Policy, Sample};
 use std::sync::mpsc::Sender;
 use std::sync::RwLock;
 
-pub fn play<S: Copy, A: Copy, G: Game<S, A>, P: Policy, M: Memory<S, A>>(
+pub fn play<G: Game, P: Policy, M: Memory<G::State, G::Action>>(
     game: &mut G,
     policy: &mut P,
     memory: &RwLock<M>,
-    sender: &Sender<Sample<S, A>>,
+    sender: &Sender<Sample<G::State, G::Action>>,
 ) {
     for sample in walk::online(game, policy, memory) {
         if sender.send(sample).is_err() {
@@ -47,7 +47,10 @@ mod tests {
         }
     }
 
-    impl Game<i8, Operation> for Counter {
+    impl Game for Counter {
+        type State = i8;
+        type Action = Operation;
+
         fn state(&self) -> i8 {
             self.value
         }

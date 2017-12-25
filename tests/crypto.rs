@@ -96,7 +96,10 @@ impl Default for Market {
     }
 }
 
-impl Game<(usize, bool), Trade> for Market {
+impl Game for Market {
+    type State = (usize, bool);
+    type Action = Trade;
+
     fn state(&self) -> (usize, bool) {
         (self.step, self.bitcoin > 0.)
     }

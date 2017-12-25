@@ -1,21 +1,17 @@
 use {walk, Game, Memory, Policy, Sample};
-use std::marker::PhantomData;
 use std::sync::RwLock;
 use std::ops::Deref;
 
-pub struct Walk<'a, S: 'a, A: 'a + Copy, G: 'a + Game<S, A>, M: 'a + Memory<S, A>, P: 'a + Policy> {
-    _a: PhantomData<A>,
-    _s: PhantomData<S>,
+pub struct Walk<'a, G: 'a + Game, M: 'a + Memory<G::State, G::Action>, P: 'a + Policy> {
     game: &'a mut G,
     policy: &'a mut P,
     memory: &'a RwLock<M>,
 }
 
-impl<'a, S, A: Copy, G: Game<S, A>, M: Memory<S, A>, P: Policy> Iterator
-    for Walk<'a, S, A, G, M, P> {
-    type Item = Sample<S, A>;
+impl<'a, G: Game, M: Memory<G::State, G::Action>, P: Policy> Iterator for Walk<'a, G, M, P> {
+    type Item = Sample<G::State, G::Action>;
 
-    fn next(&mut self) -> Option<Sample<S, A>> {
+    fn next(&mut self) -> Option<Sample<G::State, G::Action>> {
         match self.memory.read() {
             Ok(memory) => walk::step(self.game, self.policy, memory.deref()),
             Err(_) => None,
@@ -23,14 +19,12 @@ impl<'a, S, A: Copy, G: Game<S, A>, M: Memory<S, A>, P: Policy> Iterator
     }
 }
 
-pub fn online<'a, S: 'a, A: 'a + Copy, G: 'a + Game<S, A>, M: Memory<S, A>, P: 'a + Policy>(
+pub fn online<'a, G: 'a + Game, M: Memory<G::State, G::Action>, P: 'a + Policy>(
     game: &'a mut G,
     policy: &'a mut P,
     memory: &'a RwLock<M>,
-) -> Walk<'a, S, A, G, M, P> {
+) -> Walk<'a, G, M, P> {
     Walk {
-        _a: PhantomData::default(),
-        _s: PhantomData::default(),
         game: game,
         policy: policy,
         memory: memory,
@@ -60,7 +54,10 @@ mod tests {
         value: i8,
     }
 
-    impl Game<Counter, Operation> for Counter {
+    impl Game for Counter {
+        type State = Counter;
+        type Action = Operation;
+
         fn state(&self) -> Counter {
             *self
         }

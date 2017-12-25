@@ -1,10 +1,10 @@
 use {Game, Memory, Policy, Sample};
 
-pub fn step<S, A: Copy, G: Game<S, A>, P: Policy, M: Memory<S, A>>(
+pub fn step<G: Game, P: Policy, M: Memory<G::State, G::Action>>(
     game: &mut G,
     policy: &mut P,
     memory: &M,
-) -> Option<Sample<S, A>> {
+) -> Option<Sample<G::State, G::Action>> {
     let state = game.state();
 
     let mut actions_values = vec![];
@@ -46,7 +46,10 @@ mod tests {
         value: i8,
     }
 
-    impl Game<Counter, Operation> for Counter {
+    impl Game for Counter {
+        type State = Counter;
+        type Action = Operation;
+
         fn state(&self) -> Counter {
             *self
         }

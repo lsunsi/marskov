@@ -1,4 +1,4 @@
-use {walk, Game, Memory, Policy, Sample};
+use {Game, Memory, Policy, Sample};
 use std::sync::mpsc::Sender;
 use std::sync::RwLock;
 
@@ -8,7 +8,26 @@ pub fn play<G: Game, P: Policy, M: Memory<G::State, G::Action>>(
     memory: &RwLock<M>,
     sender: &Sender<Sample<G::State, G::Action>>,
 ) {
-    for sample in walk::online(game, policy, memory) {
+    loop {
+        let state = game.state();
+        let mut action_values = vec![];
+        let memory = memory.read().unwrap();
+
+        for action in game.actions() {
+            let value = memory.get(&state, &action);
+            action_values.push((action, value));
+        }
+
+        let action = match policy.choose(action_values) {
+            Some(action) => action,
+            None => break,
+        };
+
+        game.act(&action);
+        let reward = game.reward();
+        let next_state = game.state();
+        let sample = (state, action, next_state, reward);
+
         if sender.send(sample).is_err() {
             break;
         }

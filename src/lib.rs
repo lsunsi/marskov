@@ -5,7 +5,6 @@ mod brain;
 mod sample;
 mod memory;
 mod policy;
-pub mod walk;
 pub mod tasks;
 pub mod memories;
 pub mod policies;

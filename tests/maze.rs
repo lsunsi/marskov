@@ -7,12 +7,12 @@ use std::time::Duration;
 use std::sync::mpsc::channel;
 use std::thread::{sleep, spawn};
 
+use marskov::{Brain, Game};
 use marskov::memories::Table;
-use marskov::{walk, Brain, Game};
-use marskov::tasks::{play, train};
+use marskov::tasks::{play, train, walk};
 use marskov::policies::{Greedy, Random};
 
-#[derive(Hash, PartialEq, Eq, Clone, Copy)]
+#[derive(Hash, PartialEq, Eq, Clone, Copy, Debug)]
 enum Move {
     Left,
     Right,
@@ -133,15 +133,19 @@ fn solves_maze() {
     let mut greedy = Greedy::default();
     let mut maze = Maze::default();
 
-    let mut path = vec![(0, 2), (1, 2), (2, 2), (2, 1), (2, 0), (1, 0)];
+    let mut actions = vec![
+        Move::Up,
+        Move::Up,
+        Move::Right,
+        Move::Right,
+        Move::Down,
+        Move::Down,
+    ];
 
-    for sample in walk::offline(&mut maze, &mut greedy, memory.deref()) {
-        if let Some(expected_position) = path.pop() {
-            assert_eq!(sample.2.current, expected_position);
-        } else {
-            break;
+    for (action, _) in walk(&mut maze, &mut greedy, memory.deref()) {
+        match actions.pop() {
+            Some(a) => assert_eq!(a, action),
+            None => break,
         }
     }
-
-    assert_eq!(path.len(), 0);
 }

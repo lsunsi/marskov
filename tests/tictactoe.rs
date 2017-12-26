@@ -9,9 +9,9 @@ use rand::{thread_rng, Rng};
 use std::sync::mpsc::channel;
 use std::thread::{sleep, spawn};
 
+use marskov::{Brain, Game};
 use marskov::memories::Table;
-use marskov::{walk, Brain, Game};
-use marskov::tasks::{play, train};
+use marskov::tasks::{play, train, walk};
 use marskov::policies::{Egreedy, Greedy};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -169,8 +169,9 @@ fn solves_tictactoe() {
     let mut defeats: u8 = 0;
     let mut invalids: u8 = 0;
     let mut victories: u8 = 0;
-    for (game, action, _, _) in walk::offline(&mut board, &mut greedy, memory.deref()) {
-        if action != -1 {
+
+    for (_, game) in walk(&mut board, &mut greedy, memory.deref()) {
+        if !game.invalid && game.winner == Tile::Empty && game.count < 9 {
             continue;
         }
 

@@ -7,9 +7,9 @@ use std::time::Duration;
 use std::sync::mpsc::channel;
 use std::thread::{sleep, spawn};
 
+use marskov::{Brain, Game};
 use marskov::memories::Table;
-use marskov::{Brain, Game, Memory, Policy};
-use marskov::tasks::{play, train};
+use marskov::tasks::{play, train, walk};
 use marskov::policies::{Greedy, Random};
 
 #[derive(Eq, Clone, Copy, Debug, Hash, PartialEq)]
@@ -137,8 +137,6 @@ impl Game for Market {
             return -0.1;
         }
         0.0
-        // println!("{} {} {}", 1. - self.bitcoin_total() / self.last, self.bitcoin_total(), self.last);
-        // 1. - self.bitcoin_total() / self.last
     }
 }
 
@@ -176,21 +174,9 @@ fn solves_crypto() {
     let mut market = Market::default();
 
     println!("");
-    loop {
-        let mut action_values = vec![];
-        let state = market.state();
-
-        for action in market.actions() {
-            let value = memory.get(&state, &action);
-            action_values.push((action, value));
-        }
-
-        let action = greedy.choose(action_values).unwrap();
-
-        market.act(&action);
-        println!("{:?} {} {}", action, market.bitcoin_total(), market.price);
-
-        if market.is_final() {
+    for (action, game) in walk(&mut market, &mut greedy, memory.deref()) {
+        println!("{:?} {} {}", action, game.bitcoin_total(), game.price);
+        if game.is_final() {
             break;
         }
     }
